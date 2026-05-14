@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="tab-title">Gohan's Tutoring | Unblocked Games</title>
+    <link id="tab-icon" rel="icon" type="image/png" href="https://wikimedia.org">
+    <style>
+        body, html { margin: 0; padding: 0; background-color: #000; color: #ffffff; font-family: 'Segoe UI', Arial, sans-serif; min-height: 100vh; cursor: none; overflow: hidden; }
+        #matrix { position: fixed; top: 0; left: 0; z-index: 1; }
+        #custom-cursor { width: 10px; height: 10px; background: white; border-radius: 50%; position: fixed; pointer-events: none; z-index: 99999; box-shadow: 0 0 10px white, 0 0 20px white; transform: translate(-50%, -50%); transition: transform 0.05s ease-out; }
+
+        /* INTRO OVERLAY */
+        #intro-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: opacity 1s ease-in-out; }
+        .intro-text { font-size: 4rem; font-weight: bold; display: flex; gap: 15px; }
+        .slide-gohan { color: #fff; transform: translateX(-100vw); animation: slideIn 1s forwards; }
+        .slide-tutoring { color: #bec2cb; transform: translateX(100vw); animation: slideIn 1s 0.3s forwards; }
+        .click-prompt { margin-top: 20px; color: #555; font-size: 1rem; animation: pulse 2s infinite; }
+        @keyframes slideIn { to { transform: translateX(0); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        /* CONTENT LAYER */
+        .content-layer { position: relative; z-index: 10; width: 100%; height: 100vh; overflow-y: auto; text-align: center; display: none; opacity: 0; transition: opacity 1s ease-in-out; }
+        
+        /* HEADER UI */
+        .header-ui { position: relative; width: 100%; padding-top: 5vh; }
+        .logo-container img { width: 400px; max-width: 90%; height: auto; display: block; margin: 0 auto 10px auto; }
+        .settings-btn { position: absolute; top: 20px; right: 20px; background: #1f2833; border: 2px solid #bec2cb; color: white; padding: 10px 15px; border-radius: 10px; cursor: none; font-size: 1.2rem; }
+        .settings-btn:hover { background: #bec2cb; color: black; }
+
+        /* SETTINGS PANEL */
+        #settings-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 280px; background: rgba(31, 40, 51, 0.95); border: 2px solid #bec2cb; border-radius: 20px; z-index: 20001; padding: 20px; backdrop-filter: blur(10px); text-align: center; }
+        .setting-item { margin-bottom: 20px; text-align: left; }
+        .setting-item label { display: block; font-size: 0.9rem; color: #bec2cb; margin-bottom: 8px; }
+        .setting-item input { width: 100%; cursor: none; accent-color: #bec2cb; }
+
+        /* TYPING TEXT */
+        .typing-wrapper { display: inline-block; text-align: left; font-weight: bold; color: #bec2cb; font-size: 1.2rem; min-height: 40px; }
+        .type-line { overflow: hidden; white-space: nowrap; border-right: 3px solid #bec2cb; width: 0; margin: 0; display: none; }
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: #bec2cb } }
+        .line-active { display: block; animation: typing 2s steps(25, end) forwards, blink-caret .75s step-end infinite; }
+
+        /* SEARCH BAR */
+        .search-container { margin: 40px 0; }
+        #gameSearch { width: 90%; max-width: 600px; padding: 15px 25px; background: rgba(31, 40, 51, 0.9); color: white; cursor: none; border: 2px solid #bec2cb; border-radius: 30px; outline: none; font-size: 1.1rem; }
+
+        /* GRID: 3 COLUMNS */
+        .game-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; max-width: 1100px; margin: 0 auto; padding-bottom: 100px; }
+        .game-box { background: rgba(31, 40, 51, 0.75); border-radius: 12px; overflow: hidden; border: 2px solid #bec2cb; text-decoration: none; color: white; cursor: none; transition: 0.3s; backdrop-filter: blur(5px); }
+        .game-box:hover { transform: translateY(-8px); box-shadow: 0 0 20px #bec2cb; }
+        .thumbnail { width: 100%; height: 160px; object-fit: cover; border-bottom: 2px solid #bec2cb; }
+        .game-name { padding: 15px; font-weight: bold; }
+
+        /* RANDOM BOX STYLE */
+        .random-box { background: linear-gradient(45deg, #1f2833, #bec2cb); color: black !important; }
+
+        /* PANIC BUTTON */
+        #panic-btn { position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: #1f2833; border: 2px solid #bec2cb; color: #bec2cb; font-weight: bold; border-radius: 5px; z-index: 99999; cursor: none; }
+        #panic-btn:hover { background: #bec2cb; color: black; }
+    </style>
+</head>
+<body>
+
+    <div id="intro-overlay">
+        <div class="intro-text"><span class="slide-gohan">Gohan's</span><span class="slide-tutoring">Tutoring</span></div>
+        <p class="click-prompt">Click anywhere to enter</p>
+    </div>
+
+    <div id="settings-panel">
+        <h3 style="color:#bec2cb; margin-top:0;">Settings</h3>
+        <div class="setting-item">
+            <label>Matrix Rain</label>
+            <button onclick="toggleMatrix()" style="width:100%; cursor:none; background:#1f2833; border:1px solid #bec2cb; color:white; padding:8px;">ON / OFF</button>
+        </div>
+        <div class="setting-item">
+            <label>Cursor Color</label>
+            <input type="color" id="cursorColor" value="#ffffff" oninput="changeCursorColor(this.value)">
+        </div>
+        <div class="setting-item">
+            <label>Matrix Speed</label>
+            <input type="range" min="10" max="100" value="30" oninput="changeMatrixSpeed(this.value)">
+        </div>
+        <button onclick="closeSettings()" style="background:none; border:none; color:#888; text-decoration:underline; cursor:none;">Close Settings</button>
+    </div>
+
+    <div id="panic-btn" onclick="panicMode()">PANIC</div>
+    <div id="custom-cursor"></div>
+    <canvas id="matrix"></canvas>
+
+    <div class="content-layer" id="main-site">
+        <div class="header-ui">
+            <button class="settings-btn" onclick="openSettings()">⚙️ Settings</button>
+            <div class="logo-container">
+                <img src="logoo.png" alt="Logo">
+                <div class="typing-wrapper"><p id="typeLine" class="type-line"></p></div>
+            </div>
+        </div>
+
+        <div class="search-container"><input type="text" id="gameSearch" placeholder="Search games..." onkeyup="filter()"></div>
+        
+        <div class="game-grid" id="grid">
+            <!-- SLOT 1: RANDOM GAME -->
+            <a href="javascript:void(0)" onclick="pickRandomGame()" class="game-box random-box">
+                <div style="height: 160px; display: flex; align-items: center; justify-content: center; font-size: 3rem; color: #000;">?</div>
+                <div class="game-name" style="color:#000;">RANDOM GAME</div>
+            </a>
+
+            <!-- SLOTS 2-70 -->
+            <a href="1v1 LOL.html" class="game-box"><img src="1v1.jpeg" class="thumbnail"><div class="game-name">1v1 LOL</div></a>
+            <a href="99 nights.html" class="game-box"><img src="99nights.webp" class="thumbnail"><div class="game-name">99 nights in the forest</div></a>
+            <a href="2048.html" class="game-box"><img src="2048.jpg" class="thumbnail"><div class="game-name">2048</div></a>
+            <a href="among us.html" class="game-box"><img src="amoung us.jpeg" class="thumbnail"><div class="game-name">Among us</div></a>
+            <a href="angry birds.html" class="game-box"><img src="angry birds.jpeg" class="thumbnail"><div class="game-name">angry birds</div></a>
+            <a href="baldis basics.html" class="game-box"><img src="baldy.jpeg" class="thumbnail"><div class="game-name">Baldis basics</div></a>
+            <a href="bank robbery 1.html" class="game-box"><img src="bank 1.jpeg" class="thumbnail"><div class="game-name">bank robbery 1</div></a>
+            <a href="bank robbery 2.html" class="game-box"><img src="bank 2.jpeg" class="thumbnail"><div class="game-name">bank robbery 2</div></a>
+            <a href="basket legends.html" class="game-box"><img src="basketball.jpeg" class="thumbnail"><div class="game-name">Basketball legends</div></a>
+            <a href="bendy ink machine.html" class="game-box"><img src="bendy.jpg" class="thumbnail"><div class="game-name">bendy and the ink machine</div></a>
+            <a href="blade ball.html" class="game-box"><img src="bladeball.jpeg" class="thumbnail"><div class="game-name">blade ball</div></a>
+            <a href="bow masters.html" class="game-box"><img src="bowmasters.png" class="thumbnail"><div class="game-name">bow masters</div></a>
+            <a href="brawl stars.html" class="game-box"><img src="brawl.jpeg" class="thumbnail"><div class="game-name">brawl stars</div></a>
+            <a href="brotato.html" class="game-box"><img src="brotato.jpg" class="thumbnail"><div class="game-name">brotato</div></a>
+            <a href="crossy road.html" class="game-box"><img src="crossy.png" class="thumbnail"><div class="game-name">Crossy road</div></a>
+            <a href="dino game.html class" class="game-box"><img src="dino.jpeg" class="thumbnail"><div class="game-name">Dino Game</div></a>
+            <a href="dragon ball attack.html" class="game-box"><img src="attack.jpg" class="thumbnail"><div class="game-name">Dragon ball attack of sayians</div></a>
+            <a href="dragon ball devolution.html" class="game-box"><img src="dbz dev.jpg" class="thumbnail"><div class="game-name">Dragon ball Z devolution</div></a>
+            <a href="Dta 6.html" class="game-box"><img src="DTA.jpeg" class="thumbnail"><div class="game-name">DTA 6</div></a>
+            <a href="escape road 1.html" class="game-box"><img src="escape road.jpeg" class="thumbnail"><div class="game-name">Escape Road</div></a>
+            <a href="escape road 3.html" class="game-box"><img src="escape 3.jpeg" class="thumbnail"><div class="game-name">Escape Road 3</div></a>
+            <a href="FALL GUYS.html" class="game-box"><img src="fall guys.jpeg" class="thumbnail"><div class="game-name">Fall Guys</div></a>
+            <a href="FNAF 1.html" class="game-box"><img src="fnaf 1.webp" class="thumbnail"><div class="game-name">FNAF</div></a>
+            <a href="FNAF 2.html" class="game-box"><img src="fnaf 2.jpeg" class="thumbnail"><div class="game-name">FNAF 2</div></a>
+            <a href="FNAF 3.html" class="game-box"><img src="fnaf 3.jpg" class="thumbnail"><div class="game-name">FNAF 3</div></a>
+            <a href="FNAF 4.html" class="game-box"><img src="fnaf 4.jpg" class="thumbnail"><div class="game-name">FNAF 4</div></a>
+            <a href="FNF garcello.html" class="game-box"><img src="garcello.jpeg" class="thumbnail"><div class="game-name">FNF garcello</div></a>
+            <a href="FNF sonic exe.html" class="game-box"><img src="sonic exe.jpeg" class="thumbnail"><div class="game-name">FNF sonic exe</div></a>
+            <a href="fnf tabi.html" class="game-box"><img src="tabi.jpeg" class="thumbnail"><div class="game-name">FNF TABI</div></a>
+            <a href="FNF.html" class="game-box"><img src="fnf.jpg" class="thumbnail"><div class="game-name">FNF</div></a>
+            <a href="funny shooter 2.html" class="game-box"><img src="funny shooter.jpeg" class="thumbnail"><div class="game-name">funny shooter 2</div></a>
+            <a href="geometry dash.html" class="game-box"><img src="geometry dash.jpeg" class="thumbnail"><div class="game-name">Geometry dash</div></a>
+            <a href="granny.html" class="game-box"><img src="granny 1.jpeg" class="thumbnail"><div class="game-name">granny</div></a>
+            <a href="granny 2.html" class="game-box"><img src="granny 2.jpg" class="thumbnail"><div class="game-name">granny 2</div></a>
+            <a href="granny 3.html" class="game-box"><img src="granny 3.jpg" class="thumbnail"><div class="game-name">granny 3</div></a>
+            <a href="grow a garden.html" class="game-box"><img src="grow a garden.jpeg" class="thumbnail"><div class="game-name">Grow a garden</div></a>
+            <a href="GTA vice city.html" class="game-box"><img src="vice city.jpeg" class="thumbnail"><div class="game-name">GTA Vice city</div></a>
+            <a href="house of hazards.html" class="game-box"><img src="house of hazards.jpeg" class="thumbnail"><div class="game-name">house of hazards</div></a>
+            <a href="johnny trigger.html" class="game-box"><img src="johnny.jpeg" class="thumbnail"><div class="game-name">johnny</div></a>
+            <a href="Just fall LOL.html" class="game-box"><img src="just fall.jpeg" class="thumbnail"><div class="game-name">Just fall LOL</div></a>
+            <a href="level devil.html" class="game-box"><img src="level.jpeg" class="thumbnail"><div class="game-name">Level Devil</div></a>
+            <a href="metal slug.html" class="game-box"><img src="metal slug.jpg" class="thumbnail"><div class="game-name">Metal slug</div></a>
+            <a href="minecraft.html" class="game-box"><img src="minecraft.png" class="thumbnail"><div class="game-name">Minecraft</div></a>
+            <a href="mortal kombat 4.html" class="game-box"><img src="mk 4.jpg" class="thumbnail"><div class="game-name">Mortal kombat 4</div></a>
+            <a href="moto m3x pool.html" class="game-box"><img src="moto m3x.jpeg" class="thumbnail"><div class="game-name">Moto m3x pool party</div></a>
+            <a href="orange roulette.html" class="game-box"><img src="orange.jpeg" class="thumbnail"><div class="game-name">orange roulette</div></a>
+            <a href="ovo.html" class="game-box"><img src="ovo.jpeg" class="thumbnail"><div class="game-name">OvO</div></a>
+            <a href="plants vs zombies.html" class="game-box"><img src="plants vs zombies.jpeg" class="thumbnail"><div class="game-name">plants vs zombies</div></a>
+            <a href="pokemon firered.html" class="game-box"><img src="pk firered.jpeg" class="thumbnail"><div class="game-name">Pokemon fire red</div></a>
+            <a href="pokemon leafgreen.html" class="game-box"><img src="greenleaf.jpeg" class="thumbnail"><div class="game-name">pokemon leaf green</div></a>
+            <a href="rocket io.html" class="game-box"><img src="rocket goal.jpeg" class="thumbnail"><div class="game-name">rocket goal</div></a>
+            <a href="rooftop snipers.html" class="game-box"><img src="rooftop snipers.jpeg" class="thumbnail"><div class="game-name">Rooftop Snipers</div></a>
+            <a href="run 3.html" class="game-box"><img src="run 3.jpeg" class="thumbnail"><div class="game-name">Run 3</div></a>
+            <a href="slope.html" class="game-box"><img src="slope.jpg" class="thumbnail"><div class="game-name">slope</div></a>
+            <a href="snow rider.html" class="game-box"><img src="snow rider.jpeg" class="thumbnail"><div class="game-name">Snow rider</div></a>
+            <a href="soccer random.html" class="game-box"><img src="soccer random.png" class="thumbnail"><div class="game-name">Soccer random</div></a>
+            <a href="steal a brainrot.html" class="game-box"><img src="steal a brainrot.jpeg" class="thumbnail"><div class="game-name">Steal a brainrot</div></a>
+            <a href="stickman hook.html" class="game-box"><img src="stickman.jpeg" class="thumbnail"><div class="game-name">Stickman hook</div></a>
+            <a href="subway surfers miami.html" class="game-box"><img src="subway surfers miami.jpeg" class="thumbnail"><div class="game-name">Subway Surfers MIAMI</div></a>
+            <a href="super hot.html" class="game-box"><img src="superhot.jpg" class="thumbnail"><div class="game-name">superhot</div></a>
+            <a href="super mario 64.html" class="game-box"><img src="super mario 64.jpeg" class="thumbnail"><div class="game-name">Super-mario 64</div></a>
+            <a href="Super mario bros.html" class="game-box"><img src="super mario bros.jpeg" class="thumbnail"><div class="game-name">Super-mario Bros</div></a>
+            <a href="survivor io.html" class="game-box"><img src="survivor.jpeg" class="thumbnail"><div class="game-name">Survivor io</div></a>
+            <a href="Volleyball random.html" class="game-box"><img src="volleyball.jpeg" class="thumbnail"><div class="game-name">Volleyball Random</div></a>
+            <a href="vex 6.html" class="game-box"><img src="vex 6.jpeg" class="thumbnail"><div class="game-name">Vex 6</div></a>
+            <a href="tomb of mask.html" class="game-box"><img src="tomb of mask.png" class="thumbnail"><div class="game-name">Tomb of mask</div></a>
+        </div>
+    </div>
+
+    <script>
+        // --- SETTINGS ---
+        function openSettings() { document.getElementById('settings-panel').style.display = 'block'; }
+        function closeSettings() { document.getElementById('settings-panel').style.display = 'none'; }
+        function toggleMatrix() { const c = document.getElementById('matrix'); c.style.display = (c.style.display === 'none' ? 'block' : 'none'); }
+        function changeCursorColor(val) { const c = document.getElementById('custom-cursor'); c.style.background = val; c.style.boxShadow = `0 0 10px ${val}, 0 0 20px ${val}`; }
+        let matrixInterval;
+        function changeMatrixSpeed(val) { clearInterval(matrixInterval); matrixInterval = setInterval(drawMatrix, val); }
+
+        // --- RANDOM GAME ---
+        function pickRandomGame() {
+            const boxes = Array.from(document.querySelectorAll('.game-box')).slice(1); // Exclude random box
+            const random = boxes[Math.floor(Math.random() * boxes.length)];
+            window.location.href = random.getAttribute('href');
+        }
+
+        // --- PANIC & CLOAK ---
+        function panicMode() { window.open("https://google.com", "_blank"); window.location.replace("https://google.com"); }
+        window.addEventListener("blur", () => { document.title = "Home - Classroom"; });
+        window.addEventListener("focus", () => { document.title = "Gohan's Tutoring | Unblocked Games"; });
+
+        // --- CURSOR ---
+        const cursor = document.getElementById('custom-cursor');
+        document.addEventListener('mousemove', (e) => { cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px'; });
+
+        // --- TYPING TEXT ---
+        const phrases = ["Cool Games", "Timmy tuff knuckles", "Gohan is awesome", "Il be helping noel make his site"];
+        let phraseIndex = 0;
+        const typeTarget = document.getElementById('typeLine');
+        function updateTypingText() {
+            typeTarget.classList.remove('line-active'); void typeTarget.offsetWidth;
+            typeTarget.innerText = phrases[phraseIndex]; typeTarget.classList.add('line-active');
+            phraseIndex = (phraseIndex + 1) % phrases.length;
+            setTimeout(updateTypingText, 10000);
+        }
+
+        // --- INTRO ---
+        document.addEventListener('click', () => {
+            const intro = document.getElementById('intro-overlay');
+            const site = document.getElementById('main-site');
+            if(intro.style.opacity !== "0") {
+                intro.style.opacity = "0";
+                setTimeout(() => { intro.style.display = "none"; site.style.display = "block"; setTimeout(() => site.style.opacity = "1", 10); updateTypingText(); }, 1000);
+            }
+        }, { once: true });
+
+        // --- MATRIX ---
+        const canvas = document.getElementById('matrix'); const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const chars = 'ABCDEFGHIJKLMNOPGohanstutoringQRSTUVWXYZ0123456789$+-*/=%';
+        const fontSize = 16; const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#bec2cb'; ctx.font = fontSize + 'px monospace';
+            drops.forEach((y, i) => {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        matrixInterval = setInterval(drawMatrix, 30);
+
+        // --- SEARCH ---
+        function filter() {
+            let val = document.getElementById('gameSearch').value.toLowerCase();
+            let boxes = document.getElementsByClassName('game-box');
+            Array.from(boxes).forEach(b => { 
+                let match = b.innerText.toLowerCase().includes(val) || b.getAttribute('href').toLowerCase().includes(val);
+                b.style.display = match ? "block" : "none"; 
+            });
+        }
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+</script>
+
+</body>
+</html>
+
